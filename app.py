@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output, State, callback
+from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import base64
 import io
@@ -9,8 +9,12 @@ import tempfile
 from datetime import datetime
 
 # Initialize the Dash app with custom CSS
-app = dash.Dash(__name__)
+app = Dash(
+    __name__, 
+    suppress_callback_exceptions=True
+)
 
+server = app.server  
 # Add custom CSS as external stylesheets
 app.index_string = '''
 <!DOCTYPE html>
