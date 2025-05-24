@@ -240,6 +240,12 @@ app.layout = html.Div([
                 multiple=False,
                 className='upload-area'
             ),
+            dcc.Loading(
+                id="loading-2",
+                type="default",
+                color="#88bbff",
+                children=html.Div(id="loading-output-2")
+            ),
             html.Div(id='upload-status'),
         ], style=custom_styles['card']),
         
@@ -284,6 +290,12 @@ plot "data.csv" using 1:2 with lines title "Series 1", \\
             html.Button(['🚀 ', 'Generate Plot'], id='submit-button', n_clicks=0,
                        style=custom_styles['button'],
                        className='custom-button'),
+            dcc.Loading(
+                id="loading-1",
+                type="default",
+                color="#88bbff",
+                children=html.Div(id="loading-output-1")
+            ),
         ], style=custom_styles['buttonContainer']),
         
         # Output Section
@@ -304,7 +316,10 @@ plot "data.csv" using 1:2 with lines title "Series 1", \\
 uploaded_data = None
 
 @app.callback(
-    Output('upload-status', 'children'),
+    [
+        Output("loading-output-2", "children"),
+        Output('upload-status', 'children'),
+    ],
     Input('upload-data', 'contents'),
     State('upload-data', 'filename')
 )
@@ -321,7 +336,7 @@ def update_upload_status(contents, filename):
             with open(f'data.txt', 'w', encoding='utf-8') as f:
                 f.write(decoded.decode('utf-8'))   
 
-            return html.Div([
+            return "", html.Div([
                 html.Div([
                     html.Span("✅ ", style={'fontSize': '18px'}),
                     html.Span(f"Successfully uploaded: {filename}")
@@ -345,11 +360,14 @@ def update_upload_status(contents, filename):
                 ], style=custom_styles['errorMessage'])
             ])
     
-    return html.Div()
+    return "", html.Div()
 
 @app.callback(
-    [Output('plot-output', 'children'),
-     Output('error-message', 'children')],
+    [
+        Output('plot-output', 'children'),
+        Output('error-message', 'children'),
+        Output("loading-output-1", "children"),
+    ],
     Input('submit-button', 'n_clicks'),
     State('gnuplot-command', 'value')
 )
@@ -398,7 +416,7 @@ def generate_plot(n_clicks, gnuplot_command):
             
             if result.returncode != 0:
                 error_msg = result.stderr if result.stderr else "Unknown gnuplot error"
-                return html.Div(), html.Div([
+                return "", html.Div(), html.Div([
                     html.Div([
                         html.Span("🚫 ", style={'fontSize': '18px'}),
                         html.Span("Gnuplot execution failed:")
@@ -413,7 +431,7 @@ def generate_plot(n_clicks, gnuplot_command):
             
             # Check if output file was created
             if not os.path.exists(output_path):
-                return html.Div(), html.Div([
+                return "", html.Div(), html.Div([
                     html.Div([
                         html.Span("⚠️ ", style={'fontSize': '18px'}),
                         html.Span("Plot file was not generated. Check your gnuplot commands.")
@@ -427,7 +445,7 @@ def generate_plot(n_clicks, gnuplot_command):
             # Encode image for display
             encoded_image = base64.b64encode(image_data).decode()
             
-            return html.Div([
+            return "", html.Div([
                 html.Div([
                     html.H3(["🎨 ", "Generated Plot"], style=custom_styles['sectionTitle']),
                     html.Div([
@@ -440,7 +458,7 @@ def generate_plot(n_clicks, gnuplot_command):
             ]), html.Div()
             
     except FileNotFoundError:
-        return html.Div(), html.Div([
+        return "", html.Div(), html.Div([
             html.Div([
                 html.Span("🔧 ", style={'fontSize': '18px'}),
                 html.Span("Gnuplot is not installed or not found in PATH.")
@@ -453,7 +471,7 @@ def generate_plot(n_clicks, gnuplot_command):
             ], style={'marginLeft': '20px', 'color': '#374151'})
         ])
     except Exception as e:
-        return html.Div(), html.Div([
+        return "", html.Div(), html.Div([
             html.Div([
                 html.Span("❌ ", style={'fontSize': '18px'}),
                 html.Span(f"Error generating plot: {str(e)}")
