@@ -2,4 +2,6 @@ cookbook/*
 *.png
 *.txt
 *.gp
+*.jpg
+*.csv
 sketch.py
