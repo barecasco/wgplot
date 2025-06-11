@@ -4,4 +4,6 @@ cookbook/*
 *.gp
 *.jpg
 *.csv
+*.dat
 sketch.py
+.DS_store
