@@ -1,5 +1,10 @@
 import numpy as np
 import csv
+import random
+
+
+
+
 
 def generate_terrain_data(size=512, roughness=0.5, height_scale=100):
     """
